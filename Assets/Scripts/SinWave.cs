@@ -1,4 +1,5 @@
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SinWave : MonoBehaviour
@@ -10,19 +11,19 @@ public class SinWave : MonoBehaviour
     public Vector2 xLimits = new Vector2(0, 1);
     public float movementSpeed = 1;
 
-    public PolygonCollider2D polyCollider;
+    public GameObject wavePointPrefab;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         lineRenderer = GetComponent<LineRenderer>();
-        //polyCollider = GetComponent<PolygonCollider2D>();
+        Draw();
+        BuildWave();
     }
 
     void Update()
     {
         Draw();
-        //Physics();
     }
 
     void Draw()
@@ -42,11 +43,18 @@ public class SinWave : MonoBehaviour
         }
     }
 
-    void Physics()
+    private void BuildWave()
     {
-        Mesh mesh = new Mesh();
-        lineRenderer.BakeMesh(mesh);
-        //Vector3[] positions = new Vector3()[];
-        //lineRenderer.GetPositions(positions);
+        Debug.Log("count: " + lineRenderer.positionCount);
+        Vector3[] points = new Vector3[lineRenderer.positionCount];
+        lineRenderer.GetPositions(points);
+
+        Transform[] wavePoints = new Transform[points.Length];
+
+        for (int i=0; i < points.Length; i++)
+        {
+            wavePoints[i] = Instantiate(wavePointPrefab, points[i], Quaternion.identity).transform;
+            SpringJoint thisSpring = wavePoints[i].AddComponent<SpringJoint>();
+        }
     }
 }
