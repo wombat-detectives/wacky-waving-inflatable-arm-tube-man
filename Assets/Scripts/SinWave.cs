@@ -12,6 +12,11 @@ public class SinWave : MonoBehaviour
     public float movementSpeed = 1;
 
     public GameObject wavePointPrefab;
+    public GameObject waveAnchorPrefab;
+
+    private WavePoint[] wavePoints;
+    private Rigidbody2D[] waveAnchors;
+    private bool isWaveBuilt = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -40,21 +45,38 @@ public class SinWave : MonoBehaviour
             float x = Mathf.Lerp(xStart, xFinish, progress);
             float y = amplitude * Mathf.Sin((Tau * frequency * x) + Time.timeSinceLevelLoad * movementSpeed);
             lineRenderer.SetPosition(currentPoint, new Vector3(x, y, 0));
+
+            //Move Rigidbodies
+            if (isWaveBuilt)
+            {
+                waveAnchors[currentPoint].MovePosition(new Vector3(x, y, 0));
+            }
         }
     }
 
     private void BuildWave()
     {
-        Debug.Log("count: " + lineRenderer.positionCount);
+        // Get Positions of points created by linerenderer
         Vector3[] points = new Vector3[lineRenderer.positionCount];
         lineRenderer.GetPositions(points);
 
-        Transform[] wavePoints = new Transform[points.Length];
+        wavePoints = new WavePoint[points.Length];
+        waveAnchors = new Rigidbody2D[points.Length];
+        WavePoint previousPoint = null;
 
         for (int i=0; i < points.Length; i++)
         {
-            wavePoints[i] = Instantiate(wavePointPrefab, points[i], Quaternion.identity).transform;
-            SpringJoint thisSpring = wavePoints[i].AddComponent<SpringJoint>();
+            // Create wavePoint and anchor at each point
+            wavePoints[i] = Instantiate(wavePointPrefab, points[i], Quaternion.identity).GetComponent<WavePoint>();
+            waveAnchors[i] = Instantiate(waveAnchorPrefab, points[i], Quaternion.identity).GetComponent<Rigidbody2D>();
+
+            // Assign spring targets
+            wavePoints[i].SetPreviousPoint(previousPoint);
+            wavePoints[i].SetWaveJoint(waveAnchors[i]);
+
+            previousPoint = wavePoints[i];
         }
+
+        isWaveBuilt = true;
     }
 }

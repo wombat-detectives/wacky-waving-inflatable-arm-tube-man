@@ -4,7 +4,6 @@ public class WavePoint : MonoBehaviour
 {
 
     public WavePoint previousPoint;
-    public WavePoint nextPoint;
 
     public Rigidbody2D rb;
 
@@ -12,7 +11,7 @@ public class WavePoint : MonoBehaviour
     public SpringJoint2D previousJoint;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
         SpringJoint2D[] springs = GetComponents<SpringJoint2D>();
         rb = GetComponent<Rigidbody2D>();
@@ -23,20 +22,36 @@ public class WavePoint : MonoBehaviour
 
     public void SetPreviousPoint(WavePoint point)
     {
-        if(previousPoint != null)
+        if(point != null)
         {
             previousPoint = point;
             previousJoint.connectedBody = point.rb;
-            previousPoint.enabled = true;
+            previousJoint.enabled = true;
         } else
         {
-            previousPoint.enabled = false;
+            previousJoint.enabled = false;
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetPreviousPoint()
     {
-        
+        previousPoint.enabled = false;
     }
+
+    public void SetWaveJoint(Rigidbody2D waveAnchor)
+    {
+        if (waveAnchor != null) 
+        {
+            waveJoint.connectedBody = waveAnchor;
+            waveJoint.enabled = true;
+
+            //waveJoint.autoConfigureDistance = false;
+            //waveJoint.distance = 0.005f;
+        } else
+        {
+            waveJoint.enabled = false;
+        }
+            
+    }
+
 }
