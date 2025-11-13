@@ -529,10 +529,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SinWave
   lineRenderer: {fileID: 1907076717}
-  points: 90
+  points: 80
   amplitude: 0.8
   frequency: 0.1
-  xLimits: {x: -10, y: 10}
+  xLimits: {x: -10, y: 30}
   movementSpeed: 2
   wavePointPrefab: {fileID: 8753142970202170916, guid: dbe2ee61aed55464182490268c64ea78, type: 3}
   waveAnchorPrefab: {fileID: 7014476632146846179, guid: 665b15511c7817349a6545e691079a99, type: 3}
@@ -811,8 +811,8 @@ Transform:
   m_GameObject: {fileID: 2133515195}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.15, y: 3.01, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalPosition: {x: -0.8, y: 9.16, z: 0}
+  m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -830,8 +830,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   speed: 0
-  downForce: 500
   rb: {fileID: 0}
+  downForce: 100
+  downSlopeForce: 60
+  upSlopeForce: 60
 --- !u!1001 &2154878587983789141
 PrefabInstance:
   m_ObjectHideFlags: 0
