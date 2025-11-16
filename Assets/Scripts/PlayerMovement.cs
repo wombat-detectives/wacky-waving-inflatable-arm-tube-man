@@ -3,9 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed;
-
-    
+    public float targetSpeed;
 
     public Rigidbody2D rb;
 
@@ -22,8 +20,8 @@ public class PlayerMovement : MonoBehaviour
 
     // Stats
     public float downForce = 1f;
-    public float downSlopeForce = 10f;
-    public float upSlopeForce = 10f;
+    public float downSlopeForce = 1.1f;
+    public float upSlopeForce = 1.1f;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -109,6 +107,14 @@ public class PlayerMovement : MonoBehaviour
         ridingWaveDown = true;
 
         SetWavePointBelow();
+
+        // get current velocity
+        float currVel = rb.linearVelocity.magnitude;
+        // get slope
+        float slope = GetSlope();
+
+        // set target speed based on current velocity, downslopeforce, and slope
+        targetSpeed = currVel * Mathf.Abs(slope) * downSlopeForce;
     }
 
     private void StartWaveRideUp()
@@ -135,16 +141,16 @@ public class PlayerMovement : MonoBehaviour
 
             //translate towards that point, adding speed if holding down
             if (diving)
-                rb.AddForce(dir * downSlopeForce);
+            {
+                rb.linearVelocity = dir * (rb.linearVelocity.magnitude * downSlopeForce);
+            }
+                //rb.AddForce(dir * downSlopeForce);
         }
         else
         {
             //if slope goes up, stop adding speed, exit condition
             StartWaveRideUp();
         }
-
-        
-        
     }
 
     private void WaveRideUp()
@@ -159,7 +165,10 @@ public class PlayerMovement : MonoBehaviour
             Debug.DrawRay(transform.position, dir * 10, Color.green);
 
             if (!diving)
-                rb.AddForce(dir * upSlopeForce);
+            {
+                rb.linearVelocity = dir * (rb.linearVelocity.magnitude * upSlopeForce);
+            }
+                //rb.AddForce(dir * upSlopeForce);
         } else
         {
             ExitWaveRide();
