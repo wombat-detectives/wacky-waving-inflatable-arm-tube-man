@@ -600,7 +600,7 @@ MonoBehaviour:
   points: 160
   amplitude: 1
   frequency: 0.1
-  xLimits: {x: -20, y: 60}
+  xLimits: {x: -10, y: 70}
   movementSpeed: 2
   wavePointPrefab: {fileID: 8753142970202170916, guid: dbe2ee61aed55464182490268c64ea78, type: 3}
   waveAnchorPrefab: {fileID: 7014476632146846179, guid: 665b15511c7817349a6545e691079a99, type: 3}
