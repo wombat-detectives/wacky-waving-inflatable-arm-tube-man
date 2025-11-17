@@ -4,6 +4,7 @@ public class WavePoint : MonoBehaviour
 {
 
     public WavePoint previousPoint;
+    public WavePoint nextPoint;
 
     public Rigidbody2D rb;
 
@@ -26,16 +27,29 @@ public class WavePoint : MonoBehaviour
         {
             previousPoint = point;
             previousJoint.connectedBody = point.rb;
+            previousJoint.autoConfigureDistance = false;
             previousJoint.enabled = true;
         } else
         {
+            previousJoint.autoConfigureDistance = false;
+            previousJoint.distance = 0.5f;
             previousJoint.enabled = false;
         }
     }
 
     public void SetPreviousPoint()
     {
-        previousPoint.enabled = false;
+        previousJoint.autoConfigureDistance = false;
+        previousJoint.distance = 0.5f;
+        previousJoint.enabled = false;
+    }
+
+    public void SetNextPoint(WavePoint point)
+    {
+        if (point != null)
+        {
+            nextPoint = point;
+        }
     }
 
     public void SetWaveJoint(Rigidbody2D waveAnchor)

@@ -1,6 +1,8 @@
-using Unity.Collections;
+using System;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class SinWave : MonoBehaviour
 {
@@ -15,7 +17,9 @@ public class SinWave : MonoBehaviour
     public GameObject waveAnchorPrefab;
 
     private WavePoint[] wavePoints;
-    private Rigidbody2D[] waveAnchors;
+    private WavePoint firstWavePoint;
+    private WavePoint lastWavePoint;
+    private List<Rigidbody2D> waveAnchors;
     private bool isWaveBuilt = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -29,6 +33,20 @@ public class SinWave : MonoBehaviour
     void Update()
     {
         Draw();
+    }
+
+    private void FixedUpdate()
+    {
+        //make the last few points chill tf out
+        float x = xLimits.y; // upper limit
+        float y = amplitude * Mathf.Sin((2 * MathF.PI * frequency * x) + Time.timeSinceLevelLoad * movementSpeed);
+        Vector3 newPos = new Vector3(x, y, 0);
+
+        lastWavePoint.rb.MovePosition(waveAnchors[points-1].position);
+        lastWavePoint.rb.linearVelocity = Vector2.zero;
+
+        lastWavePoint.previousPoint.rb.MovePosition(waveAnchors[points - 2].position);
+        lastWavePoint.previousPoint.rb.linearVelocity = Vector2.zero;
     }
 
     void Draw()
@@ -61,7 +79,10 @@ public class SinWave : MonoBehaviour
         lineRenderer.GetPositions(points);
 
         wavePoints = new WavePoint[points.Length];
-        waveAnchors = new Rigidbody2D[points.Length];
+
+        Rigidbody2D[] waveAnchorsArray = new Rigidbody2D[points.Length];
+        waveAnchors = new List<Rigidbody2D>(waveAnchorsArray);
+        
         WavePoint previousPoint = null;
 
         for (int i=0; i < points.Length; i++)
@@ -75,8 +96,70 @@ public class SinWave : MonoBehaviour
             wavePoints[i].SetWaveJoint(waveAnchors[i]);
 
             previousPoint = wavePoints[i];
+
+            if (i == 0)
+            {
+                firstWavePoint = wavePoints[i];
+            } else if (i == points.Length - 1)
+            {
+                lastWavePoint = wavePoints[i];
+            }
+        }
+
+        WavePoint nextPoint = null;
+
+        for (int i=points.Length-1; i >= 0; i--)
+        {
+            wavePoints[i].SetNextPoint(nextPoint);
+
+            nextPoint = wavePoints[i];
         }
 
         isWaveBuilt = true;
+    }
+
+    [ContextMenu("Move Wave 1 point")]
+    public void MoveWave()
+    {
+        WavePoint pointToMove = firstWavePoint;
+
+        // handle anchors
+        Rigidbody2D waveAnchorToMove = waveAnchors[0];
+        waveAnchors.RemoveAt(0);
+        waveAnchors.Add(waveAnchorToMove);
+
+        // handle line renderer
+        float moveDistance = (xLimits.y - xLimits.x) / points;
+        xLimits = new Vector2(xLimits.x + moveDistance, xLimits.y + moveDistance);
+
+        //find new location
+        float x = xLimits.y; // upper limit
+        float y = amplitude * Mathf.Sin((2 * MathF.PI * frequency * x) + Time.timeSinceLevelLoad * movementSpeed);
+        Vector3 newPos = new Vector3(x, y, 0);
+
+        // move anchor
+        waveAnchorToMove.MovePosition(newPos);
+
+        //move first point to new location
+        pointToMove.SetPreviousPoint();
+        pointToMove.rb.MovePosition(newPos);
+        //pointToMove.transform.position = waveAnchorToMove.position;
+        pointToMove.rb.linearVelocity = Vector3.zero;
+
+        Debug.Log("distance after move: " + pointToMove.previousJoint.distance);
+
+        // handle wavePoint
+        firstWavePoint = firstWavePoint.nextPoint;
+        firstWavePoint.SetPreviousPoint();
+        pointToMove.SetPreviousPoint(lastWavePoint);
+        lastWavePoint.SetNextPoint(pointToMove);
+        lastWavePoint = pointToMove;
+
+        //pointToMove.previousJoint.autoConfigureDistance = false;
+        //pointToMove.previousJoint.distance = (pointToMove.previousPoint.waveJoint.connectedBody.position - pointToMove.waveJoint.connectedBody.position).magnitude;
+        
+        Debug.Log("distance after all: " + pointToMove.previousJoint.distance);
+
+
     }
 }

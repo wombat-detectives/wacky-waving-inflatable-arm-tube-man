@@ -1,11 +1,18 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
     public float targetSpeed;
+    public float distance = 0;
+    private float distanceSinceWaveMove;
+    private float distanceForMove;
+    private float distanceToMove;
 
     public Rigidbody2D rb;
+
+    public SinWave wave;
 
     InputAction diveAction;
 
@@ -30,6 +37,8 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
 
         diveAction = InputSystem.actions.FindAction("Dive");
+
+        distanceForMove = (wave.xLimits.y - wave.xLimits.x) / wave.points;
     }
 
     // Update is called once per frame
@@ -42,6 +51,8 @@ public class PlayerMovement : MonoBehaviour
         {
             diving = false;
         }
+
+        
     }
 
     private void FixedUpdate()
@@ -56,6 +67,27 @@ public class PlayerMovement : MonoBehaviour
         } else if (diving)
         {
             Dive();
+        }
+
+        if (transform.position.x > distance)
+        {
+            distance = transform.position.x;
+        }
+
+        int numMoves = (int)((distance - distanceSinceWaveMove + distanceToMove) / distanceForMove);
+        Debug.Log(distance +  " - " +  distanceSinceWaveMove + " / " + distanceForMove + " = " + numMoves);
+        if (numMoves > 0)
+        {
+            distanceToMove += distance - distanceSinceWaveMove;
+
+            for (int i = 0; i < numMoves; i++)
+            {
+                Debug.Log("moving: " + i);
+                wave.MoveWave();
+                distanceToMove -= distanceForMove;
+            }
+
+            distanceSinceWaveMove = distance;
         }
     }
 
@@ -91,15 +123,24 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void SetWavePointBelow()
+    private bool SetWavePointBelow()
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 99f, LayerMask.GetMask("Water"));
         // if raycast hits water
         if (hit && hit.transform.GetComponent<WavePoint>() != null)
         {
-            wavePointBelow = hit.transform.GetComponent<WavePoint>();
-            wavePointPrevious = wavePointBelow.previousPoint;
+            if (wavePointBelow == wavePointPrevious)
+            {
+                return false;
+            }
+            else
+            {
+                wavePointBelow = hit.transform.GetComponent<WavePoint>();
+                wavePointPrevious = wavePointBelow.previousPoint;
+                return true;
+            }
         }
+        return false;
     }
 
     private void StartWaveRideDown()

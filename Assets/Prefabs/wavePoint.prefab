@@ -144,7 +144,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0.1
+  m_LinearDamping: 0.12
   m_AngularDamping: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
@@ -171,6 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WavePoint
   previousPoint: {fileID: 0}
+  nextPoint: {fileID: 0}
   rb: {fileID: 0}
   waveJoint: {fileID: 0}
   previousJoint: {fileID: 0}
@@ -193,8 +194,8 @@ SpringJoint2D:
   m_ConnectedAnchor: {x: 0, y: 0}
   m_AutoConfigureDistance: 0
   m_Distance: 0.005
-  m_DampingRatio: 0.1
-  m_Frequency: 1
+  m_DampingRatio: 0.12
+  m_Frequency: 0.9
 --- !u!231 &6311620812156444316
 SpringJoint2D:
   m_ObjectHideFlags: 0
@@ -213,6 +214,6 @@ SpringJoint2D:
   m_Anchor: {x: 0, y: 0}
   m_ConnectedAnchor: {x: 0, y: 0}
   m_AutoConfigureDistance: 1
-  m_Distance: 1
-  m_DampingRatio: 0.1
-  m_Frequency: 1
+  m_Distance: 0.5
+  m_DampingRatio: 0.12
+  m_Frequency: 0.9
