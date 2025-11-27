@@ -6,6 +6,10 @@ using UnityEngine.UIElements;
 
 public class SinWave : MonoBehaviour
 {
+    public delegate float WaveFormula(float x, float time, float amplitude, float frequency);
+    public WaveFormula customFormula;
+
+    public Material wavePointMaterial;
     public LineRenderer lineRenderer;
     public int points;
     public float amplitude = 1.0f;
@@ -61,7 +65,21 @@ public class SinWave : MonoBehaviour
         {
             float progress = (float)currentPoint / (points - 1);
             float x = Mathf.Lerp(xStart, xFinish, progress);
-            float y = amplitude * Mathf.Sin((Tau * frequency * x) + Time.timeSinceLevelLoad * movementSpeed);
+            float time = Time.timeSinceLevelLoad * movementSpeed;
+
+            float y;
+
+            if (customFormula != null)
+            {
+                // Use external formula
+                y = customFormula(x, time, amplitude, frequency);
+            }
+            else
+            {
+                // Default sine wave
+                y = amplitude * Mathf.Sin((Tau * frequency * x) + time);
+            }
+
             lineRenderer.SetPosition(currentPoint, new Vector3(x, y, 0));
 
             //Move Rigidbodies
@@ -90,6 +108,13 @@ public class SinWave : MonoBehaviour
             // Create wavePoint and anchor at each point
             wavePoints[i] = Instantiate(wavePointPrefab, points[i], Quaternion.identity).GetComponent<WavePoint>();
             waveAnchors[i] = Instantiate(waveAnchorPrefab, points[i], Quaternion.identity).GetComponent<Rigidbody2D>();
+
+            // Apply material to each point
+            Renderer r = wavePoints[i].GetComponent<Renderer>();
+            if (r != null && wavePointMaterial != null)
+            {
+                r.material = wavePointMaterial;
+            }
 
             // Assign spring targets
             wavePoints[i].SetPreviousPoint(previousPoint);
@@ -162,4 +187,14 @@ public class SinWave : MonoBehaviour
 
 
     }
+    public float GetSurfaceHeightAtX(float x)
+    {
+        float progress = Mathf.InverseLerp(xLimits.x, xLimits.y, x);
+        int index = Mathf.RoundToInt(progress * (points - 1));
+
+        index = Mathf.Clamp(index, 0, points - 1);
+
+        return waveAnchors[index].position.y;
+    }
+
 }
